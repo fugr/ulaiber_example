@@ -113,7 +113,7 @@ func runTasks(w http.ResponseWriter, r *http.Request) {
 	select {
 	case <-ctx.Done():
 		err := ctx.Err()
-		log.Println("运行次数：%d 全排列：%d key=%s token=%s error=%s", atomic.LoadUint32(&total), len(keys), req.Origin, req.Token, err)
+		log.Printf("运行次数：%d 全排列：%d key=%s token=%s error=%s", atomic.LoadUint32(&total), len(keys), req.Origin, req.Token, err)
 
 		if err != nil {
 			fmt.Fprint(w, err.Error())
@@ -121,7 +121,7 @@ func runTasks(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 
 	case v := <-ch:
-		log.Println("运行次数：%d 全排列：%d key=%s token=%s magic=%s", atomic.LoadUint32(&total), len(keys), req.Origin, req.Token, v)
+		log.Printf("运行次数：%d 全排列：%d key=%s token=%s magic=%s", atomic.LoadUint32(&total), len(keys), req.Origin, req.Token, v)
 
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(v))
@@ -166,7 +166,7 @@ func checkAndCount(ctx context.Context, keys []string, url, token string, ch cha
 }
 
 // setup server,if background is true,run server in a new goroutine.
-func setupServer(background bool) {
+func setupServer(background bool, addr string) {
 	mux := http.NewServeMux()
 
 	// handlers
@@ -177,13 +177,13 @@ func setupServer(background bool) {
 
 	if background {
 		go func() {
-			log.Println("setup Server in background", defaultPort)
-			log.Fatal(http.ListenAndServe(defaultPort, mux))
+			log.Println("setup Server in background", addr)
+			log.Fatal(http.ListenAndServe(addr, mux))
 		}()
 
 	} else {
-		log.Println("setup Server", defaultPort)
+		log.Println("setup Server", addr)
 
-		log.Fatal(http.ListenAndServe(defaultPort, mux))
+		log.Fatal(http.ListenAndServe(addr, mux))
 	}
 }

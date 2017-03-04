@@ -12,11 +12,11 @@ import (
 var (
 	flURL   = flag.String("url", "", "http://pythoninterview.ulaiber.com/")
 	flAddrs = flag.String("addrs", "", "host1:8888,host2:8888")
+	flPort  = flag.String("port", "8888", "task distribution server")
 )
 
 const (
-	localhost      = "localhost:8888"
-	defaultPort    = ":8888"
+	localhost      = "localhost"
 	limitPerSecode = 500
 	tokenTimeout   = 30 * time.Second
 )
@@ -26,10 +26,10 @@ var count, total uint32
 func main() {
 	flag.Parse()
 
-	setupServer(*flURL != "")
+	setupServer(*flURL != "", ":"+*flPort)
 
 	hosts := strings.Split(*flAddrs, ",")
-	hosts = append(hosts, localhost)
+	hosts = append(hosts, localhost+":"+*flPort)
 	addrs := make([]string, 0, len(hosts))
 	for i := range hosts {
 		if hosts[i] == "" {
@@ -78,7 +78,7 @@ func main() {
 		return
 
 	case v := <-ch:
-		log.Println("运行次数：%d 全排列：%d key=%s token=%s magic=%s", atomic.LoadUint32(&total), len(keys), key, token, v)
+		log.Printf("运行次数：%d 全排列：%d key=%s token=%s magic=%s", atomic.LoadUint32(&total), len(keys), key, token, v)
 		return
 	}
 }
